@@ -14,7 +14,6 @@ class keyboard():
         self.button_height = button_height
         self.buttons = buttons
         self.alt_buttons = alt_buttons
-        #self.buttons[0].append()
 
     def build(self):
         i = 0
@@ -27,15 +26,30 @@ class keyboard():
                 rowspan = 1
                 width = self.button_width
                 height = self.button_height
+                callback = lambda v=value: self.entry.insert(tkinter.INSERT, v)
                 if value == " ":
                     columnspan = 5
                     width = 5 * self.button_width
-                callback = lambda v=value: self.entry.insert(tkinter.INSERT, v)
+                elif value == "SHIFT":
+                    print(c)
+                    columnspan = 2
+                    width = 2 * self.button_width
+                    # callback = TODO: add shift functionality
+                elif value == "ENTER":
+                    columnspan = 2
+                    rowspan = 2
+                    width = 2 * self.button_width
+                    height = 2 * self.button_height
+                    # callback = TODO: add enter functionality
+                elif value == "BACKSPACE":
+                    columnspan = 2
+                    width = 2 * self.button_width
+                    callback = lambda: self.entry.delete(self.entry.index(tkinter.INSERT) - 1)
                 button = tkinter.Button(self.frame, text=value, width=width, height=height, command=callback)
                 button.grid(row=r, column=c, columnspan=columnspan, rowspan=rowspan)
-                i = i+1
-                c = c+1
-            r = r+1
+                i = i + 1
+                c = c + columnspan
+            r = r + 1
             c = 0
 
     def check_values(self, buttons, alt_buttons):
@@ -61,17 +75,14 @@ def main():
     root = tkinter.Tk()
     e = tkinter.Entry(root)
     e.pack()
-    #buttons = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    #layout = [3, 3, 3]
-    buttons = [["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
-               ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-               ["z", "x", "c", "v", "b", "n", "m"],
+    buttons = [["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "BACKSPACE"],
+               ["a", "s", "d", "f", "g", "h", "j", "k", "l", "ENTER"],
+               ["SHIFT", "z", "x", "c", "v", "b", "n", "m"],
                [" "]]
-    alt_buttons = [["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-                   ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-                   ["Z", "X", "C", "V", "B", "N", "M"],
+    alt_buttons = [["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "BACKSPACE"],
+                   ["A", "S", "D", "F", "G", "H", "J", "K", "L", "ENTER"],
+                   ["SHIFT", "Z", "X", "C", "V", "B", "N", "M"],
                    [" "]]
-    #layout = [10, 9, 7, 1]
     kb = keyboard(root, e, 10, 5, buttons, alt_buttons)
     kb.build()
     root.mainloop()
