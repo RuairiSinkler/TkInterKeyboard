@@ -114,6 +114,7 @@ class keyboard():
     def set_entry(self, entry):
         self.entry = entry
 
+# Example code used for testing, creates a basic keyboard with an entry box to work with
 def main():
     root = tkinter.Tk()
     e = tkinter.Entry(root)
