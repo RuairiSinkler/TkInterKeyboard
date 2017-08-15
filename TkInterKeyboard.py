@@ -3,7 +3,7 @@ import tkinter
 class keyboard():
 
     # layout should be an array with lengths of rows
-    def __init__(self, master, entry, button_width, button_height, buttons, alt_buttons=None):
+    def __init__(self, master, entry, button_width, button_height, buttons, alt_buttons=None, enter_function=None):
         all_ok = self.check_values(buttons, alt_buttons)
         if not(all_ok):
             raise ValueError
@@ -15,6 +15,7 @@ class keyboard():
         self.button_values = []
         self.buttons = buttons
         self.alt_buttons = alt_buttons
+        self.enter_function = enter_function
         self.shift = False
         self.caps_lock = False
 
@@ -52,7 +53,10 @@ class keyboard():
                         rowspan = 2
                         width = 2 * self.button_width
                         height = 2 * self.button_height
-                        # callback = TODO: add enter functionality
+                        if self.enter_function is None:
+                            callback = self.enter_function
+                        else:
+                            callback = lambda: self.enter_function()
                     elif name == "BACKSPACE":
                         columnspan = 2
                         width = 2 * self.button_width
@@ -122,7 +126,8 @@ def main():
                    ["CAPS_LOCK", "A", "S", "D", "F", "G", "H", "J", "K", "L", "ENTER"],
                    ["SHIFT", "Z", "X", "C", "V", "B", "N", "M"],
                    ["BLANK", "BLANK", "BLANK", "SPACE"]]
-    kb = keyboard(root, e, 10, 5, buttons, alt_buttons)
+    enter_function = lambda: print("enter")
+    kb = keyboard(root, e, 10, 5, buttons, alt_buttons, enter_function)
     kb.build()
     root.mainloop()
 
