@@ -1,23 +1,39 @@
 import tkinter
+from tkinter import font
 
 class keyboard():
 
-    # layout should be an array with lengths of rows
-    def __init__(self, master, entry, button_width, button_height, buttons, alt_buttons=None, enter_function=None):
+    DEFAULT_WIDTH = 10
+    DEFAULT_HEIGHT = 5
+    DEFAULT_BACKGROUND = "gray"
+    DEFAULT_FOREGROUND = "white"
+    DEFAULT_ACTIVE_BACKGROUND = "light gray"
+    DEFAULT_ACTIVE_FOREGROUND = "white"
+    DEFAULT_FONT = "DejaVuSans"
+    DEFAULT_FONT_SIZE = 10
+
+    def __init__(self, root, master, entry, buttons, alt_buttons=None, enter_function=None, **cnf):
         all_ok = self.check_values(buttons, alt_buttons)
         if not(all_ok):
             raise ValueError
         self.frame = tkinter.Frame(master)
         self.frame.pack()
         self.entry = entry
-        self.button_width = button_width
-        self.button_height = button_height
+        self.keys = {}
         self.button_values = []
         self.buttons = buttons
         self.alt_buttons = alt_buttons
         self.enter_function = enter_function
         self.shift = False
         self.caps_lock = False
+        self.button_width = cnf.get("button_width", self.DEFAULT_WIDTH)
+        self.button_height = cnf.get("button_height", self.DEFAULT_HEIGHT)
+        self.background = cnf.get("background", self.DEFAULT_BACKGROUND)
+        self.foreground = cnf.get("foreground", self.DEFAULT_FOREGROUND)
+        self.active_background = cnf.get("active_background", self.DEFAULT_ACTIVE_BACKGROUND)
+        self.active_foreground = cnf.get("active_foreground", self.DEFAULT_ACTIVE_FOREGROUND)
+        self.font = font.Font(family=cnf.get("font", self.DEFAULT_FONT),
+                                      size=cnf.get("font_size", self.DEFAULT_FONT_SIZE))
 
     def build(self):
         i = 0
@@ -61,8 +77,12 @@ class keyboard():
                         columnspan = 2
                         width = 2 * self.button_width
                         callback = lambda: self.entry.delete(self.entry.index(tkinter.INSERT) - 1)
-                    button = tkinter.Button(self.frame, textvariable=value, width=width, height=height, command=callback)
+                    button = tkinter.Button(self.frame, textvariable=value, width=width, height=height, command=callback,
+                                            background=self.background, foreground=self.foreground,
+                                            activebackground=self.active_background,
+                                            activeforeground=self.active_foreground, font=self.font)
                     button.grid(row=r, column=c, columnspan=columnspan, rowspan=rowspan)
+                    self.keys[name] = button
                 i = i + 1
                 c = c + columnspan
             r = r + 1
@@ -93,10 +113,10 @@ class keyboard():
         return True
 
     def refresh_vars(self):
-        if self.shift != self.caps_lock:
+        values = self.buttons
+        # If shift or Caps Lock are active (but not both) then use alt buttons, if they exist
+        if self.shift != self.caps_lock and not(self.alt_buttons is None):
             values = self.alt_buttons
-        else:
-            values = self.buttons
         i = 0
         for row in values:
             for element in row:
@@ -105,10 +125,22 @@ class keyboard():
 
     def toggle_caps_lock(self):
         self.caps_lock = not(self.caps_lock)
+        if self.caps_lock:
+            self.keys.get("CAPS_LOCK").config(background=self.active_background, activebackground=self.background,
+                                              foreground=self.active_foreground, activeforeground=self.foreground)
+        else:
+            self.keys.get("CAPS_LOCK").config(background=self.background, activebackground=self.active_background,
+                                              foreground=self.foreground, activeforeground=self.active_foreground)
         self.refresh_vars()
 
     def toggle_shift(self):
         self.shift = not(self.shift)
+        if self.shift:
+            self.keys.get("SHIFT").config(background=self.active_background, activebackground=self.background,
+                                          foreground=self.active_foreground, activeforeground=self.foreground)
+        else:
+            self.keys.get("SHIFT").config(background=self.background, activebackground=self.active_background,
+                                          foreground=self.foreground, activeforeground=self.active_foreground)
         self.refresh_vars()
 
     def set_entry(self, entry):
@@ -119,16 +151,18 @@ def main():
     root = tkinter.Tk()
     e = tkinter.Entry(root)
     e.pack()
-    buttons = [["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "BACKSPACE"],
-               ["CAPS_LOCK", "a", "s", "d", "f", "g", "h", "j", "k", "l", "ENTER"],
+    buttons = [["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "BACKSPACE"],
+               ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "ENTER"],
+               ["CAPS_LOCK", "a", "s", "d", "f", "g", "h", "j", "k", "l"],
                ["SHIFT", "z", "x", "c", "v", "b", "n", "m"],
                ["BLANK", "BLANK", "BLANK", "SPACE"]]
-    alt_buttons = [["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "BACKSPACE"],
-                   ["CAPS_LOCK", "A", "S", "D", "F", "G", "H", "J", "K", "L", "ENTER"],
+    alt_buttons = [["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "BACKSPACE"],
+                   ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "ENTER"],
+                   ["CAPS_LOCK", "A", "S", "D", "F", "G", "H", "J", "K", "L"],
                    ["SHIFT", "Z", "X", "C", "V", "B", "N", "M"],
                    ["BLANK", "BLANK", "BLANK", "SPACE"]]
     enter_function = lambda: print("enter")
-    kb = keyboard(root, e, 10, 5, buttons, alt_buttons, enter_function)
+    kb = keyboard(root, root, e, buttons, alt_buttons, enter_function)
     kb.build()
     root.mainloop()
 
