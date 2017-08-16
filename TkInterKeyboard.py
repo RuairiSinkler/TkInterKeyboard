@@ -3,14 +3,14 @@ from tkinter import font
 
 class keyboard():
 
-    DEFAULT_WIDTH = 10
-    DEFAULT_HEIGHT = 5
+    DEFAULT_WIDTH = 8
+    DEFAULT_HEIGHT = 3
     DEFAULT_BACKGROUND = "gray"
     DEFAULT_FOREGROUND = "white"
     DEFAULT_ACTIVE_BACKGROUND = "light gray"
     DEFAULT_ACTIVE_FOREGROUND = "white"
     DEFAULT_FONT = "DejaVuSans"
-    DEFAULT_FONT_SIZE = 10
+    DEFAULT_FONT_SIZE = 12
 
     def __init__(self, root, master, entry, buttons, alt_buttons=None, enter_function=None, **cnf):
         all_ok = self.check_values(buttons, alt_buttons)
@@ -47,6 +47,7 @@ class keyboard():
                 name = value.get()
                 columnspan = 1
                 rowspan = 1
+                wraplength = 0
                 width = self.button_width
                 height = self.button_height
                 if name == "BLANK":
@@ -58,8 +59,9 @@ class keyboard():
                         value.set(" ")
                         columnspan = 5
                         width = 5 * self.button_width
-                    elif name == "CAPS_LOCK":
+                    elif name == "CAPS LOCK":
                         callback = lambda: self.toggle_caps_lock()
+                        wraplength = 50
                     elif name == "SHIFT":
                         columnspan = 2
                         width = 2 * self.button_width
@@ -76,17 +78,23 @@ class keyboard():
                     elif name == "BACKSPACE":
                         columnspan = 2
                         width = 2 * self.button_width
-                        callback = lambda: self.entry.delete(self.entry.index(tkinter.INSERT) - 1)
+                        callback = lambda: self.delete()
                     button = tkinter.Button(self.frame, textvariable=value, width=width, height=height, command=callback,
                                             background=self.background, foreground=self.foreground,
                                             activebackground=self.active_background,
-                                            activeforeground=self.active_foreground, font=self.font)
+                                            activeforeground=self.active_foreground, font=self.font, wraplength=wraplength)
                     button.grid(row=r, column=c, columnspan=columnspan, rowspan=rowspan)
                     self.keys[name] = button
                 i = i + 1
                 c = c + columnspan
             r = r + 1
             c = 0
+
+    def delete(self):
+        if isinstance(self.entry, tkinter.Entry):
+            self.entry.delete(self.entry.index(tkinter.INSERT) - 1)
+        elif isinstance(self.entry, tkinter.Text):
+            self.entry.delete("%s-1c" % tkinter.INSERT, tkinter.INSERT)
 
     def key_press(self, value):
         self.entry.insert(tkinter.INSERT, value.get())
@@ -126,10 +134,10 @@ class keyboard():
     def toggle_caps_lock(self):
         self.caps_lock = not(self.caps_lock)
         if self.caps_lock:
-            self.keys.get("CAPS_LOCK").config(background=self.active_background, activebackground=self.background,
+            self.keys.get("CAPS LOCK").config(background=self.active_background, activebackground=self.background,
                                               foreground=self.active_foreground, activeforeground=self.foreground)
         else:
-            self.keys.get("CAPS_LOCK").config(background=self.background, activebackground=self.active_background,
+            self.keys.get("CAPS LOCK").config(background=self.background, activebackground=self.active_background,
                                               foreground=self.foreground, activeforeground=self.active_foreground)
         self.refresh_vars()
 
@@ -153,13 +161,13 @@ def main():
     e.pack()
     buttons = [["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "BACKSPACE"],
                ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "ENTER"],
-               ["CAPS_LOCK", "a", "s", "d", "f", "g", "h", "j", "k", "l"],
-               ["SHIFT", "z", "x", "c", "v", "b", "n", "m"],
+               ["CAPS LOCK", "a", "s", "d", "f", "g", "h", "j", "k", "l"],
+               ["SHIFT", "z", "x", "c", "v", "b", "n", "m", ",", "."],
                ["BLANK", "BLANK", "BLANK", "SPACE"]]
     alt_buttons = [["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "BACKSPACE"],
                    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "ENTER"],
-                   ["CAPS_LOCK", "A", "S", "D", "F", "G", "H", "J", "K", "L"],
-                   ["SHIFT", "Z", "X", "C", "V", "B", "N", "M"],
+                   ["CAPS LOCK", "A", "S", "D", "F", "G", "H", "J", "K", "L"],
+                   ["SHIFT", "Z", "X", "C", "V", "B", "N", "M", ",", "."],
                    ["BLANK", "BLANK", "BLANK", "SPACE"]]
     enter_function = lambda: print("enter")
     kb = keyboard(root, root, e, buttons, alt_buttons, enter_function)
